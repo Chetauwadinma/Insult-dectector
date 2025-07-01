@@ -1,7 +1,11 @@
 # app.py
 
-from flask import Flask, request, jsonify, render_template
+import pandas as pd
+import numpy as np
 import pickle
+# Let's pretend you use scikit-learn in your model
+from sklearn.ensemble import RandomForestClassifier
+from flask import Flask, request, jsonify, render_template
 
 # --- Create a Flask application ---
 app = Flask(__name__)
