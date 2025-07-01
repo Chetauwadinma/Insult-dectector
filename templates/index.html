@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Insult Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f7f9;
+            --card-bg-color: #ffffff;
+            --primary-color: #4a90e2;
+            --primary-hover-color: #357ABD;
+            --text-color: #333;
+            --subtle-text-color: #888;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(-45deg, #e7f0ff, #f3e7ff, #e7ffe8, #ffefe7);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background-color: var(--card-bg-color);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            text-align: center;
+            width: 90%;
+            max-width: 550px;
+            transform: translateY(-20px);
+            opacity: 0;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .header-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px auto;
+            color: var(--primary-color);
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: var(--subtle-text-color);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: 'Poppins', sans-serif;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: inline-block;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.4s ease-in-out;
+        }
+
+        #result.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .result-content svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Result Styles */
+        #result.insult {
+            background-color: #fff0f0;
+            color: var(--error-color);
+        }
+        #result.not-insult {
+            background-color: #f0fff4;
+            color: var(--success-color);
+        }
+        #result.loading {
+            background-color: #f0f8ff;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- SVG Icon for the header -->
+        <svg class="header-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.572L16.5 21.75l-.398-1.178a3.375 3.375 0 00-2.456-2.456L12.5 17.25l1.178-.398a3.375 3.375 0 002.456-2.456L16.5 13.5l.398 1.178a3.375 3.375 0 002.456 2.456L20.5 17.25l-1.178.398a3.375 3.375 0 00-2.424 2.424z" />
+        </svg>
+
+        <h1>AI Insult Detector</h1>
+        <p>Our advanced AI will analyze your text to determine if it's likely to be perceived as insulting. Enter a comment below to begin.</p>
+
+        <form id="prediction-form">
+            <textarea id="text-input" name="text" rows="4" placeholder="e.g., You are a shining star..." required></textarea>
+            <button type="submit">Analyze Text</button>
+        </form>
+
+        <div id="result">
+            <!-- Content will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('prediction-form');
+        const resultDiv = document.getElementById('result');
+        
+        // Define SVG icons for different states
+        const icons = {
+            loading: `
+                <div class="result-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="animate-spin"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.695v-4.992m0 0h-4.992m4.992 0l-3.181-3.183a8.25 8.25 0 00-11.667 0L2.985 9.348z" /></svg>
+                    <span>Analyzing...</span>
+                </div>`,
+            insult: `
+                <div class="result-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                    <span>This is likely an insult.</span>
+                </div>`,
+            notInsult: `
+                <div class="result-content">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>This is not an insult.</span>
+                </div>`
+        };
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const userInput = document.getElementById('text-input').value;
+
+            // Show loading state
+            resultDiv.className = 'loading visible';
+            resultDiv.innerHTML = icons.loading;
+            
+            const formData = new URLSearchParams();
+            formData.append('text', userInput);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                // Check if the prediction string is 'offensive'
+                if (data.prediction === 'offensive') {
+                    resultDiv.className = 'insult visible';
+                    resultDiv.innerHTML = icons.insult;
+                } else {
+                    resultDiv.className = 'not-insult visible';
+                    resultDiv.innerHTML = icons.notInsult;
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch:', error);
+                resultDiv.className = 'insult visible';
+                resultDiv.innerHTML = `<div class="result-content"><span>Error: Could not get a prediction.</span></div>`;
+            });
+        });
+    </script>
+</body>
+</html>
